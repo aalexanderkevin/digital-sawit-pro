@@ -1,0 +1,226 @@
+# This is the OpenAPI specification for your service. It is used to generate the client code.
+# To generate the server code, use the Gradle task `openApiGenerate`. The 
+# generated code will be placed in `build/generate-resources/main`.
+#
+# We will evaluate you based on how well you design your API.
+# 1. How well it follows REST principles.
+# 2. How easy it is to understand and use.
+#
+# References
+# 1. https://swagger.io/specification/
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: User Service
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:8080
+paths:
+  /register:
+    post:
+      summary: Register new user
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Register"
+      responses:
+        '201':
+          $ref: '#/components/responses/RegisterSuccessful'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /login:
+    post:
+      summary: Login existing user
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Login"
+      responses:
+        '200':
+          $ref: '#/components/responses/LoginSuccessful'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /profile:
+    get:
+      summary: Get my profile
+      operationId: getProfile
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '200':
+          $ref: '#/components/responses/GetMyProfileSuccessful'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Update my profile
+      operationId: updateProfile
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMyProfile"
+      responses:
+        '200':
+          description: OK
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    PhoneNumber:
+      type: string
+      minLength: 10
+      maxLength: 13
+      pattern: ^\+62\d{8,11}$
+    FullName:
+      type: string
+      minLength: 3
+      maxLength: 60
+    Password:
+      type: string
+      minLength: 6
+      maxLength: 64
+      pattern: "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+])[A-Za-z0-9!@#$%^&*()_+]+$"
+
+    Register:
+      type: object
+      required:
+        - phone_number
+        - full_name
+        - password
+      properties:
+        phone_number:
+          $ref: '#/components/schemas/PhoneNumber'
+        full_name:
+          $ref: '#/components/schemas/FullName'
+        password:
+          $ref: '#/components/schemas/Password'
+    Login:
+      type: object
+      required:
+        - phone_number
+        - password
+      properties:
+        phone_number:
+          $ref: '#/components/schemas/PhoneNumber'
+        password:
+          $ref: '#/components/schemas/Password'
+    UpdateMyProfile:
+      type: object
+      required:
+        - phone_number
+        - full_name
+      properties:
+        phone_number:
+          $ref: '#/components/schemas/PhoneNumber'
+        full_name:
+          $ref: '#/components/schemas/FullName'
+ 
+ 
+  responses:
+    RegisterSuccessful:
+      description: Register successful
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              user_id:
+                type: string
+                description: The ID of user
+    LoginSuccessful:
+      description: Login successful
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              user_id:
+                type: string
+                description: The ID of the user
+              jwt_token:
+                type: string
+                description: JWT with algorithm RS256
+    GetMyProfileSuccessful:
+      description: Return fullName and phoneNumber
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              phone_number:
+                type: string
+                description: The phone number
+              full_name:
+                type: string
+                description: The name of the user
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error_message:
+                type: string
+                description: The error message
+    NotFound:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error_message:
+                type: string
+                description: The error message
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error_message:
+                type: string
+                description: The error message
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error_message:
+                type: string
+                description: The error message
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error_message:
+                type: string
+                description: The error message
