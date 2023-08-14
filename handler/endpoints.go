@@ -89,8 +89,29 @@ func (s *Server) Login(ctx echo.Context) error {
 
 // (GET /profile)
 func (s *Server) GetProfile(ctx echo.Context) error {
+	var resp generated.GetMyProfileSuccessful
 
-	return nil
+	// Get token
+	token := helper.GetAuthToken(ctx)
+	if token == "" {
+		return WriteFailResponse(ctx, model.Error{Code: http.StatusForbidden, Message: "jwt not found"})
+	}
+
+	jwtData, err := helper.DecodeClaims(token)
+	if err != nil {
+		return WriteFailResponse(ctx, model.Error{Code: http.StatusForbidden, Message: "jwt is not valid"})
+	}
+
+	profile, err := s.Repository.Get(ctx.Request().Context(), repository.UserGetFilter{
+		PhoneNumber: &jwtData.PhoneNumber,
+	})
+	if err != nil {
+		return WriteFailResponse(ctx, err)
+	}
+
+	resp.FullName = profile.FullName
+	resp.PhoneNumber = profile.PhoneNumber
+	return ctx.JSON(http.StatusOK, resp)
 }
 
 // (PUT /profile)
