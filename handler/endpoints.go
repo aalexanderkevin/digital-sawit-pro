@@ -27,11 +27,17 @@ func (s *Server) Register(ctx echo.Context) error {
 		FullName:    &req.FullName,
 	}
 	if err := user.Validate(); err != nil {
-		return ctx.JSON(http.StatusBadRequest, err)
+		return ctx.JSON(http.StatusBadRequest, model.Error{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 	}
 
 	if err := model.IsPasswordValid(req.Password); !err {
-		return ctx.JSON(http.StatusBadRequest, errors.New("invalid password format"))
+		return ctx.JSON(http.StatusBadRequest, model.Error{
+			Code:    http.StatusBadRequest,
+			Message: "invalid password format",
+		})
 	}
 
 	passwordSalt := ksuid.New().String()
@@ -60,6 +66,14 @@ func (s *Server) Login(ctx echo.Context) error {
 	var resp generated.LoginSuccessful
 
 	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	user := &model.User{
+		PhoneNumber: &req.PhoneNumber,
+		Password:    &req.Password,
+	}
+	if err := user.Validate(); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 

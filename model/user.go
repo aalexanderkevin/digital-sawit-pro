@@ -5,7 +5,6 @@ import (
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
 type User struct {
@@ -22,7 +21,7 @@ func (u User) Validate() error {
 	return validation.ValidateStruct(
 		&u,
 		validation.Field(&u.PhoneNumber, validation.Required, validation.Length(10, 13), validation.Match(regexp.MustCompile(`^\+62\d+$`))),
-		validation.Field(&u.FullName, validation.Required, validation.Length(3, 60), is.Alpha),
+		validation.Field(&u.FullName, validation.Required, validation.Length(3, 60)),
 		validation.Field(&u.Password, validation.Length(6, 64)),
 	)
 }
