@@ -91,7 +91,6 @@ components:
       type: string
       minLength: 10
       maxLength: 13
-      pattern: ^\+62\d{8,11}$
     FullName:
       type: string
       minLength: 3
@@ -100,7 +99,6 @@ components:
       type: string
       minLength: 6
       maxLength: 64
-      pattern: "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+])[A-Za-z0-9!@#$%^&*()_+]+$"
 
     Register:
       type: object
