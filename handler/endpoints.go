@@ -40,7 +40,7 @@ func (s *Server) Register(ctx echo.Context) error {
 	user, err := s.Repository.Add(ctx.Request().Context(), user)
 	if err != nil {
 		var e model.Error
-		if !errors.As(err, &e) {
+		if errors.As(err, &e) {
 			return ctx.JSON(e.Code, e)
 		} else {
 			return ctx.JSON(http.StatusInternalServerError, model.Error{
@@ -67,19 +67,19 @@ func (s *Server) Login(ctx echo.Context) error {
 		PhoneNumber: &req.PhoneNumber,
 	})
 	if err != nil {
-		WriteFailResponse(ctx, err)
+		return WriteFailResponse(ctx, err)
 	}
 
 	token, err := helper.GenerateJwt(*user)
 	if err != nil {
-		WriteFailResponse(ctx, err)
+		return WriteFailResponse(ctx, err)
 	}
 
 	_, err = s.Repository.Update(ctx.Request().Context(), *user.Id, &model.User{
 		SuccessfulLogin: helper.Pointer(*user.SuccessfulLogin + 1),
 	})
 	if err != nil {
-		WriteFailResponse(ctx, err)
+		return WriteFailResponse(ctx, err)
 	}
 
 	resp.UserId = user.Id
