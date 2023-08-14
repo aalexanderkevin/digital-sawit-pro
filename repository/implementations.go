@@ -31,7 +31,15 @@ func (u *Repository) Get(ctx context.Context, filter UserGetFilter) (*model.User
 		PhoneNumber: filter.PhoneNumber,
 	}
 
-	err := u.Db.WithContext(ctx).First(&user).Error
+	q := u.Db.WithContext(ctx)
+	if filter.Id != nil {
+		q = q.Where("id = ?", filter.Id)
+	}
+	if filter.PhoneNumber != nil {
+		q = q.Where("phone_number = ?", filter.PhoneNumber)
+	}
+
+	err := q.First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, model.NewNotFoundError()
