@@ -143,6 +143,6 @@ func getPostgresUrl(dbName *string) string {
 		dbNameTmp = *dbName
 	}
 
-	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%v sslmode=disable", dbConfig.Host,
-		dbConfig.Username, dbConfig.Password, dbNameTmp, dbConfig.Port)
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		dbConfig.Username, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbNameTmp)
 }
