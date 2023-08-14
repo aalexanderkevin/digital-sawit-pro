@@ -61,6 +61,10 @@ func (u *Repository) Update(ctx context.Context, id string, user *model.User) (*
 	tx := u.Db.WithContext(ctx)
 	err = tx.Model(&User{Id: &id}).Updates(&gormModel).Error
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+			return nil, model.NewDuplicateError()
+		}
 		return nil, err
 	}
 
