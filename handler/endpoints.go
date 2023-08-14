@@ -66,7 +66,7 @@ func (s *Server) Login(ctx echo.Context) error {
 		WriteFailResponse(ctx, err)
 	}
 
-	token, err := generateJwt(*user)
+	token, err := helper.GenerateJwt(*user)
 	if err != nil {
 		WriteFailResponse(ctx, err)
 	}
