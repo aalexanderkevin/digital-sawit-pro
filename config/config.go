@@ -20,11 +20,11 @@ type Config struct {
 
 type DBConfig struct {
 	Client     string `default:"postgres" env:"POSTGRES_CLIENT"`
-	Host       string `default:"127.0.0.1" env:"POSTGRES_HOST"`
-	Username   string `default:"root" env:"POSTGRES_USER"`
-	Password   string `required:"true" env:"POSTGRES_PASSWORD"`
+	Host       string `default:"db" env:"POSTGRES_HOST"`
+	Username   string `default:"postgres" env:"POSTGRES_USER"`
+	Password   string `default:"postgres" env:"POSTGRES_PASSWORD"`
 	Port       uint   `default:"5432" env:"POSTGRES_PORT"`
-	Database   string `default:"gits" env:"POSTGRES_DATABASE"`
+	Database   string `default:"postgres" env:"POSTGRES_DATABASE"`
 	Migrations struct {
 		Path string `default:"./database.sql" env:"POSTGRES_MIGRATION_PATH"`
 	}
