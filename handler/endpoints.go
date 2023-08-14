@@ -66,15 +66,21 @@ func (s *Server) Login(ctx echo.Context) error {
 	var resp generated.LoginSuccessful
 
 	if err := ctx.Bind(&req); err != nil {
-		return ctx.JSON(http.StatusBadRequest, err)
+		return ctx.JSON(http.StatusBadRequest, model.Error{
+			Message: err.Error(),
+			Code:    http.StatusBadRequest,
+		})
 	}
 
 	user := &model.User{
 		PhoneNumber: &req.PhoneNumber,
 		Password:    &req.Password,
 	}
-	if err := user.Validate(); err != nil {
-		return ctx.JSON(http.StatusBadRequest, err)
+	if err := user.ValidateLogin(); err != nil {
+		return ctx.JSON(http.StatusBadRequest, model.Error{
+			Message: err.Error(),
+			Code:    http.StatusBadRequest,
+		})
 	}
 
 	user, err := s.Repository.Get(ctx.Request().Context(), repository.UserGetFilter{

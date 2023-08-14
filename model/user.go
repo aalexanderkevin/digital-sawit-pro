@@ -26,6 +26,14 @@ func (u User) Validate() error {
 	)
 }
 
+func (u User) ValidateLogin() error {
+	return validation.ValidateStruct(
+		&u,
+		validation.Field(&u.PhoneNumber, validation.Required, validation.Length(10, 13), validation.Match(regexp.MustCompile(`^\+62\d+$`))),
+		validation.Field(&u.Password, validation.Required, validation.Length(6, 64)),
+	)
+}
+
 func IsPasswordValid(password string) bool {
 	if len(password) < 8 {
 		return false
