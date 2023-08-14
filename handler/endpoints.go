@@ -116,13 +116,42 @@ func (s *Server) GetProfile(ctx echo.Context) error {
 
 // (PUT /profile)
 func (s *Server) UpdateProfile(ctx echo.Context) error {
+	var req generated.UpdateMyProfile
 
-	return nil
+	// Get token
+	token := helper.GetAuthToken(ctx)
+	if token == "" {
+		return WriteFailResponse(ctx, model.Error{Code: http.StatusForbidden, Message: "jwt not found"})
+	}
+
+	jwtData, err := helper.DecodeClaims(token)
+	if err != nil {
+		return WriteFailResponse(ctx, model.Error{Code: http.StatusForbidden, Message: "jwt is not valid"})
+	}
+
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	user := &model.User{
+		PhoneNumber: &req.PhoneNumber,
+		FullName:    &req.FullName,
+	}
+	if err := user.Validate(); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	_, err = s.Repository.Update(ctx.Request().Context(), jwtData.Id, user)
+	if err != nil {
+		return WriteFailResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, "OK")
 }
 
 func WriteFailResponse(ctx echo.Context, err error) error {
 	var e model.Error
-	if !errors.As(err, &e) {
+	if errors.As(err, &e) {
 		return ctx.JSON(e.Code, e)
 	} else {
 		return ctx.JSON(http.StatusInternalServerError, model.Error{
