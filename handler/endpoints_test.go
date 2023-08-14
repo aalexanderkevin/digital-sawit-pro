@@ -4,6 +4,7 @@ import (
 	"digital-sawit-pro/helper"
 	"digital-sawit-pro/model"
 	"digital-sawit-pro/repository"
+	"errors"
 
 	"bytes"
 	"net/http"
@@ -44,7 +45,7 @@ func TestLogin(t *testing.T) {
 						SuccessfulLogin: helper.Pointer(0),
 					}, nil)
 
-					mockRepo.EXPECT().Update(gomock.Any(), "231", &model.User{
+					mockRepo.EXPECT().Update(gomock.Any(), "id", &model.User{
 						SuccessfulLogin: helper.Pointer(1),
 					}).Return(nil, nil)
 
@@ -59,6 +60,34 @@ func TestLogin(t *testing.T) {
 					`)))
 
 					// Create a response recorder to capture the response
+					res := httptest.NewRecorder()
+
+					c := echo.New().NewContext(req, res)
+					c.Request().Header.Set("Content-Type", "application/json")
+					return c
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "ShouldReturnError_WhenFailedGetProfileByPhoneNumber",
+			fields: fields{
+				Repository: func() repository.RepositoryInterface {
+					mockCtrl := gomock.NewController(t)
+					mockRepo := repository.NewMockRepositoryInterface(mockCtrl)
+					mockRepo.EXPECT().Get(gomock.Any(), repository.UserGetFilter{
+						PhoneNumber: helper.Pointer("+6283398768003"),
+					}).Return(nil, errors.New("error get"))
+
+					return mockRepo
+				},
+			},
+			args: args{
+				ctx: func() echo.Context {
+					// Create a mock request with GET method and an empty request body
+					req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer([]byte(`{"password": "PassWord21!","phone_number": "+6283398768003"}`)))
+
+					// Create a response recorder to capture the response
 					rec := httptest.NewRecorder()
 
 					c := echo.New().NewContext(req, rec)
@@ -68,32 +97,6 @@ func TestLogin(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		// {
-		// 	name: "failed during get phone number will result error 500",
-		// 	fields: fields{
-		// 		Repository: func() repository.RepositoryInterface {
-		// 			mockCtrl := gomock.NewController(t)
-		// 			mockRepo := repository.NewMockRepositoryInterface(mockCtrl)
-		// 			mockRepo.EXPECT().GetUserByPhoneNumber(gomock.Any(), "+628128813798").Return(repository.GetUserOutput{}, errors.New("some error"))
-
-		// 			return mockRepo
-		// 		},
-		// 	},
-		// 	args: args{
-		// 		ctx: func() echo.Context {
-		// 			// Create a mock request with GET method and an empty request body
-		// 			req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer([]byte(`{"password": "Testaja1!","phone_number": "+628128813798"}`)))
-
-		// 			// Create a response recorder to capture the response
-		// 			rec := httptest.NewRecorder()
-
-		// 			c := echo.New().NewContext(req, rec)
-		// 			c.Request().Header.Set("Content-Type", "application/json")
-		// 			return c
-		// 		},
-		// 	},
-		// 	wantErr: true,
-		// },
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
