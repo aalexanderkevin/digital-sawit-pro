@@ -30,6 +30,10 @@ func (s *Server) Register(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 
+	if err := model.IsPasswordValid(req.Password); !err {
+		return ctx.JSON(http.StatusBadRequest, errors.New("invalid password format"))
+	}
+
 	passwordSalt := ksuid.New().String()
 	user.Password = helper.Pointer(helper.Hash(passwordSalt, req.Password))
 	user.PasswordSalt = helper.Pointer(passwordSalt)
