@@ -9,7 +9,7 @@ import (
 type Config struct {
 	Service struct {
 		Host string `default:"0.0.0.0" env:"SERVICE_HOST"`
-		Port string `default:"8080" env:"SERVICE_PORT"`
+		Port string `default:"1323" env:"SERVICE_PORT"`
 		Path struct {
 			V1 string `default:"/v1" env:"SERVICE_PATH_API"`
 		}
